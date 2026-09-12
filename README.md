@@ -4,7 +4,7 @@
 网址：https://agul79.github.io/BlackFlowNotes/
 
 ## 离线网页使用：
-下载 'index.html'，双击运行使用，手机电脑均可使用。
+下载 'BlackFlowNotes.html'，本地运行网页，手机电脑均可使用。
 
 
 ## 桌面软件使用：
