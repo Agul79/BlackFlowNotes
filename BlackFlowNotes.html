@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>黑流树海笔记 · 节点记录</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-main: #0a0a0a;
+            --bg-panel: #1a1a1a;
+            --panel-border: #2a2a2a;
+            --text-white: #f0f0f0;
+            --text-gray: #a0a0a0;
+            --empty-text: #5a5a5a;
+            --title-text: #ffffff;
+            --btn-left: #2a2a2a;
+            --btn-left-hover: #3a4a6a;
+            --btn-left-text: #e8e8e8;
+            --btn-right: #60a5fa;
+            --btn-right-hover: #7bb8fc;
+            --btn-right-text: #ffffff;
+            --reset-bg: #8a1a1a;
+            --reset-hover: #aa2a2a;
+            --reset-fg: #f0f0f0;
+            --mode-btn-bg: #1a1a1a;
+            --mode-btn-fg: #a0a0a0;
+            --count-text: #6a9af4;
+            --divider-color: transparent;
+            --divider-opacity: 0;
+        }
+
+        [data-theme="light"] {
+            --bg-main: #f0f2f5;
+            --bg-panel: #ffffff;
+            --panel-border: #d0d5dd;
+            --text-white: #1a1a2e;
+            --text-gray: #6a6a7a;
+            --empty-text: #b0b0b8;
+            --title-text: #1a1a2e;
+            --btn-left: #e8ecf1;
+            --btn-left-hover: #d0d8e6;
+            --btn-left-text: #1a1a2e;
+            --btn-right: #60a5fa;
+            --btn-right-hover: #7bb8fc;
+            --btn-right-text: #ffffff;
+            --reset-bg: #dc2626;
+            --reset-hover: #ef4444;
+            --reset-fg: #ffffff;
+            --mode-btn-bg: #e8ecf1;
+            --mode-btn-fg: #6a6a7a;
+            --count-text: #2563eb;
+            --divider-color: #0a0a0a;
+            --divider-opacity: 1;
+        }
+
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+            background: var(--bg-main);
+            color: var(--text-white);
+            min-height: 100vh;
+            transition: background 0.3s, color 0.3s;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 16px 20px 20px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            text-align: center;
+            padding: 12px 0 6px;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .header-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--title-text);
+            transition: color 0.3s;
+            letter-spacing: 2px;
+        }
+
+        .header-sub {
+            font-size: 12px;
+            color: var(--text-gray);
+            margin-top: 4px;
+            transition: color 0.3s;
+            letter-spacing: 1px;
+        }
+
+        .mode-toggle {
+            position: absolute;
+            top: 50%;
+            right: 0;
+            transform: translateY(-50%);
+            background: var(--mode-btn-bg);
+            color: var(--mode-btn-fg);
+            border: none;
+            border-radius: 6px;
+            font-size: 18px;
+            width: 38px;
+            height: 38px;
+            cursor: pointer;
+            transition: background 0.3s, color 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mode-toggle:hover {
+            background: var(--btn-left-hover);
+            color: var(--text-white);
+        }
+
+        .main {
+            flex: 1;
+            display: flex;
+            gap: 12px;
+            margin-top: 12px;
+            min-height: 0;
+            align-items: stretch;
+        }
+
+        .panel {
+            flex: 1;
+            background: var(--bg-panel);
+            border: 1px solid var(--panel-border);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: background 0.3s, border-color 0.3s;
+            min-width: 0;
+            position: relative;
+        }
+
+        /* ===== 装饰条：每个面板左侧内部 ===== */
+        .panel::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 16px;
+            bottom: 16px;
+            width: 8px;
+            border-radius: 0 4px 4px 0;
+            background: var(--divider-color);
+            opacity: var(--divider-opacity);
+            transition: background 0.3s, opacity 0.3s;
+            box-shadow: 0 0 16px rgba(10, 10, 10, 0.12);
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        /* 白天模式：黑色装饰条 */
+        [data-theme="light"] .panel::before {
+            background: #0a0a0a;
+            opacity: 1;
+        }
+
+        /* 黑夜模式：白色装饰条 */
+        [data-theme="dark"] .panel::before {
+            background: #f0f2f5;
+            opacity: 1;
+        }
+
+        .panel-header {
+            padding: 12px 16px 8px 20px;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-white);
+            transition: color 0.3s;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            z-index: 1;
+        }
+
+        .panel-header .count {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--count-text);
+            transition: color 0.3s;
+        }
+
+        .panel-body {
+            flex: 1;
+            padding: 8px 12px 16px 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-wrap: wrap;
+            align-content: flex-start;
+            gap: 8px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .empty-hint {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--empty-text);
+            font-size: 15px;
+            transition: color 0.3s;
+            min-height: 120px;
+        }
+
+        .node-btn {
+            padding: 8px 6px;
+            border-radius: 6px;
+            border: 1px solid var(--panel-border);
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.1s;
+            text-align: center;
+            min-width: 0;
+            flex: 0 0 calc(25% - 8px);
+            max-width: calc(25% - 8px);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-family: inherit;
+        }
+
+        .node-btn:active {
+            transform: scale(0.96);
+        }
+
+        .node-left {
+            background: var(--btn-left);
+            color: var(--btn-left-text);
+            border-color: var(--panel-border);
+        }
+
+        .node-left:hover {
+            background: var(--btn-left-hover);
+        }
+
+        .node-right {
+            background: var(--btn-right);
+            color: var(--btn-right-text);
+            border-color: var(--btn-right);
+        }
+
+        .node-right:hover {
+            background: var(--btn-right-hover);
+            border-color: var(--btn-right-hover);
+        }
+
+        .footer {
+            flex-shrink: 0;
+            text-align: center;
+            padding: 12px 0 4px;
+        }
+
+        .reset-btn {
+            background: var(--reset-bg);
+            color: var(--reset-fg);
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 700;
+            padding: 10px 36px;
+            cursor: pointer;
+            transition: background 0.3s, color 0.3s;
+            font-family: inherit;
+        }
+
+        .reset-btn:hover {
+            background: var(--reset-hover);
+        }
+
+        .reset-btn:active {
+            transform: scale(0.97);
+        }
+
+        .status-bar {
+            font-size: 12px;
+            color: var(--text-gray);
+            margin-top: 6px;
+            transition: color 0.3s;
+            min-height: 20px;
+        }
+
+        .status-bar.done {
+            color: var(--title-text);
+            font-weight: 700;
+        }
+
+        /* ===== 移动端 ===== */
+        @media (max-width: 700px) {
+            .main {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .panel::before {
+                display: none;
+            }
+
+            .panel-header {
+                padding: 10px 12px 6px;
+            }
+
+            .panel-body {
+                padding: 8px 12px 16px;
+            }
+
+            .node-btn {
+                flex: 0 0 calc(33.33% - 8px);
+                max-width: calc(33.33% - 8px);
+                font-size: 12px;
+                padding: 6px 4px;
+            }
+
+            .header-title {
+                font-size: 17px;
+            }
+
+            .mode-toggle {
+                font-size: 16px;
+                width: 34px;
+                height: 34px;
+            }
+
+            .container {
+                padding: 10px 12px 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .node-btn {
+                flex: 0 0 calc(50% - 8px);
+                max-width: calc(50% - 8px);
+                font-size: 11px;
+                padding: 5px 4px;
+            }
+
+            .header-title {
+                font-size: 15px;
+            }
+        }
+
+        .panel-body::-webkit-scrollbar {
+            width: 4px;
+        }
+        .panel-body::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .panel-body::-webkit-scrollbar-thumb {
+            background: var(--panel-border);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="app">
+
+        <div class="header">
+            <div class="header-title">◆ 黑流树海笔记 · 节点记录 ◆</div>
+            <div class="header-sub">← 点击左侧选择探索 · 点击右侧撤销选择 →</div>
+            <button class="mode-toggle" id="modeToggle" title="切换日间/夜间模式">☀</button>
+        </div>
+
+        <div class="main">
+            <div class="panel">
+                <div class="panel-header">
+                    <span>◈ 未探索</span>
+                </div>
+                <div class="panel-body" id="leftContainer"></div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <span>◈ 已探索</span>
+                    <span class="count" id="countLabel">0 / 22</span>
+                </div>
+                <div class="panel-body" id="rightContainer"></div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <button class="reset-btn" id="resetBtn">↻ 重新作战</button>
+            <div class="status-bar" id="statusBar"></div>
+        </div>
+
+    </div>
+
+    <script>
+        const NODES = [
+            "作战","紧急作战","绿商店", "黄商店","林间空地",
+            "不期而遇","得偿所愿","先行一步","失与得", "安全的角落", 
+            "羽瞰点","狭路相逢", "应急助力","居民据点",
+            "误入奇境",  "曲折密道", "未知的诡秘","未知的凶戾",
+            "险路尽头", "险路小径", "险路恶敌", "命运所指"
+        ];
+
+        const STORAGE_KEY = 'blackflow_nodes';
+
+        function loadData() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    if (data.leftNodes && data.rightNodes) {
+                        return data;
+                    }
+                }
+            } catch (e) {}
+            return { leftNodes: [...NODES], rightNodes: [] };
+        }
+
+        function saveData(leftNodes, rightNodes) {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify({ leftNodes, rightNodes }));
+            } catch (e) {}
+        }
+
+        let data = loadData();
+        let leftNodes = data.leftNodes;
+        let rightNodes = data.rightNodes;
+        let theme = 'dark';
+
+        const leftContainer = document.getElementById('leftContainer');
+        const rightContainer = document.getElementById('rightContainer');
+        const countLabel = document.getElementById('countLabel');
+        const statusBar = document.getElementById('statusBar');
+        const resetBtn = document.getElementById('resetBtn');
+        const modeToggle = document.getElementById('modeToggle');
+
+        try {
+            const savedTheme = localStorage.getItem('blackflow_theme');
+            if (savedTheme === 'light') {
+                theme = 'light';
+                document.documentElement.setAttribute('data-theme', 'light');
+                modeToggle.textContent = '🌙';
+            }
+        } catch (e) {}
+
+        function render() {
+            leftContainer.innerHTML = '';
+            rightContainer.innerHTML = '';
+
+            if (leftNodes.length === 0) {
+                const empty = document.createElement('div');
+                empty.className = 'empty-hint';
+                empty.textContent = '✓ 全部已探索';
+                leftContainer.appendChild(empty);
+            } else {
+                leftNodes.forEach(name => {
+                    const btn = document.createElement('button');
+                    btn.className = 'node-btn node-left';
+                    btn.textContent = name;
+                    btn.dataset.name = name;
+                    btn.addEventListener('click', () => moveToRight(name));
+                    leftContainer.appendChild(btn);
+                });
+            }
+
+            if (rightNodes.length === 0) {
+                const empty = document.createElement('div');
+                empty.className = 'empty-hint';
+                empty.textContent = '尚未探索任何节点';
+                rightContainer.appendChild(empty);
+            } else {
+                rightNodes.forEach(name => {
+                    const btn = document.createElement('button');
+                    btn.className = 'node-btn node-right';
+                    btn.textContent = name;
+                    btn.dataset.name = name;
+                    btn.addEventListener('click', () => moveToLeft(name));
+                    rightContainer.appendChild(btn);
+                });
+            }
+
+            const total = NODES.length;
+            const done = rightNodes.length;
+            countLabel.textContent = `${done} / ${total}`;
+
+            if (done === total) {
+                statusBar.textContent = '✦ 全部探索完成 ✦';
+                statusBar.className = 'status-bar done';
+            } else {
+                statusBar.textContent = '';
+                statusBar.className = 'status-bar';
+            }
+
+            saveData(leftNodes, rightNodes);
+        }
+
+        function moveToRight(name) {
+            const idx = leftNodes.indexOf(name);
+            if (idx !== -1) {
+                leftNodes.splice(idx, 1);
+                rightNodes.push(name);
+                render();
+            }
+        }
+
+        function moveToLeft(name) {
+            const idx = rightNodes.indexOf(name);
+            if (idx !== -1) {
+                rightNodes.splice(idx, 1);
+                leftNodes.push(name);
+                render();
+            }
+        }
+
+        function resetAll() {
+            leftNodes = [...NODES];
+            rightNodes = [];
+            render();
+        }
+
+        function toggleTheme() {
+            if (theme === 'dark') {
+                theme = 'light';
+                document.documentElement.setAttribute('data-theme', 'light');
+                modeToggle.textContent = '🌙';
+            } else {
+                theme = 'dark';
+                document.documentElement.removeAttribute('data-theme');
+                modeToggle.textContent = '☀';
+            }
+            try {
+                localStorage.setItem('blackflow_theme', theme);
+            } catch (e) {}
+        }
+
+        resetBtn.addEventListener('click', resetAll);
+        modeToggle.addEventListener('click', toggleTheme);
+
+        render();
+    </script>
+
+</body>
+</html>
