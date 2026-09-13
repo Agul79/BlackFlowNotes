@@ -75,15 +75,15 @@
         /* ===== 左侧竖排装饰 ===== */
         .side-title {
             position: fixed;
-            left: -30px;
+            left: -2vmin;
             top: 47%;
             transform: translateY(-50%) rotate(180deg);
             writing-mode: vertical-rl;
             text-orientation: sideways;
             font-family: "Arial Black", "Impact", "Microsoft YaHei", sans-serif;
-            font-size: 110px;
+            font-size: clamp(60px, 12vmin, 140px);
             font-weight: 900;
-            letter-spacing: 6px;
+            letter-spacing: 0.05em;
             color: var(--side-title-color);
             pointer-events: none;
             user-select: none;
@@ -96,20 +96,20 @@
         /* ===== 右侧竖排装饰 ===== */
         .side-title-right {
             position: fixed;
-            right: -30px;
-            top: 25%; 
+            right: -2vmin;
+            top: 25%;
             transform: translateY(-50%) rotate(180deg);
             writing-mode: vertical-rl;
             text-orientation: sideways;
             font-family: "Arial Black", "Impact", "Microsoft YaHei", sans-serif;
-            font-size: 110px;
+            font-size: clamp(60px, 12vmin, 140px);
             font-weight: 900;
-            letter-spacing: 6px;
+            letter-spacing: 0.05em;
             color: var(--side-title-color);
             pointer-events: none;
             user-select: none;
             z-index: 0;
-            opacity: 0.12;    
+            opacity: 0.12;
             transition: color 0.3s ease 0.4s;
             white-space: nowrap;
         }
@@ -336,18 +336,6 @@
         }
 
         @media (max-width: 700px) {
-            .side-title {
-                font-size: 60px;
-                left: -20px;
-                opacity: 0.08;
-            }
-
-            .side-title-right {
-                font-size: 60px;
-                right: -20px;
-                opacity: 0.08;
-            }
-
             .main {
                 flex-direction: column;
                 gap: 10px;
@@ -402,18 +390,6 @@
         }
 
         @media (max-width: 480px) {
-            .side-title {
-                font-size: 40px;
-                left: -15px;
-                opacity: 0.06;
-            }
-
-            .side-title-right {
-                font-size: 40px;
-                right: -15px;
-                opacity: 0.06;
-            }
-
             .node-btn {
                 flex: 0 0 calc(50% - 8px);
                 max-width: calc(50% - 8px);
